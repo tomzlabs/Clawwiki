@@ -1,0 +1,15 @@
+{
+    "name": "generative-agents-town",
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "dev:server": "npm run dev --workspace=@town/server",
+        "dev:client": "npm run dev --workspace=@town/client",
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
