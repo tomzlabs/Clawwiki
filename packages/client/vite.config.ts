@@ -11,5 +11,9 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 5173,
         allowedHosts: ['townclient-production.up.railway.app', 'clawverse.wiki', '.railway.app']
+    },
+    build: {
+        outDir: '../../dist', // Output to root dist folder to make Vercel happy
+        emptyOutDir: true
     }
 });
