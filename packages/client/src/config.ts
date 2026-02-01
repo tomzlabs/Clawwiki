@@ -1,9 +1,17 @@
 // Auto-detect environment
 const isProd = import.meta.env.PROD;
 
-// If you deploy server to Railway/Render, put that URL here.
-// For now, we'll assume a placeholder that you can override with env vars.
-export const SERVER_URL = import.meta.env.VITE_SERVER_URL || (isProd ? 'https://YOUR_BACKEND_URL.railway.app' : 'http://localhost:3001');
+const defaultUrl = isProd ? 'https://townserver-production.up.railway.app' : 'http://localhost:3001';
+let serverUrl = import.meta.env.VITE_SERVER_URL || defaultUrl;
+
+// Sanitize URL
+serverUrl = serverUrl.trim();
+if (!serverUrl.startsWith('http')) {
+    serverUrl = `https://${serverUrl}`;
+}
+
+export const SERVER_URL = serverUrl;
+console.log('API config:', { isProd, SERVER_URL, raw: import.meta.env.VITE_SERVER_URL });
 
 export const API_BASE = `${SERVER_URL}/api/wiki`;
 export const AGENTS_API = `${SERVER_URL}/api/agents/recent`;
