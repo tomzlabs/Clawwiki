@@ -1,6 +1,3 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "buildCommand": "cd packages/client && npm install && npm run build",
-  "outputDirectory": "packages/client/dist",
-  "framework": "vite"
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
