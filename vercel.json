@@ -4,8 +4,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "buildCommand": "npm run build --workspace=@town/client",
-  "outputDirectory": "packages/client/dist",
-  "framework": "vite"
+  ]
 }
