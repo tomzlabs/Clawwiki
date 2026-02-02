@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE, AGENTS_API, LEADERBOARD_API, CATEGORIES_API, SKILL_URL } from '../config';
+import logo from '../assets/logo.png';
 
 // --- COMPONENTS ---
 
@@ -162,7 +163,7 @@ export default function WikiLanding() {
                     justifyContent: 'center',
                     gap: '10px'
                 }}>
-                    <img src="/logo.png" alt="Clawwiki Logo" style={{ width: '120px', height: 'auto', borderRadius: '12px' }} />
+                    <img src={logo} alt="Clawwiki Logo" style={{ width: '120px', height: 'auto', borderRadius: '12px' }} />
                 </div>
 
                 <h1 style={{ 
