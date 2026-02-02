@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { SERVER_URL } from '../config';
 
-const API_BASE = 'http://localhost:3001/api/wiki/agent';
+const API_BASE = `${SERVER_URL}/api/wiki/agent`;
 
 interface AgentArticles {
     created: any[];

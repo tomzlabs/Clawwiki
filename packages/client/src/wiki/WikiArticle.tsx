@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-
-const API_BASE = 'http://localhost:3001/api/wiki';
+import { API_BASE } from '../config';
 
 export default function WikiArticle() {
     const { slug } = useParams<{ slug: string }>();
