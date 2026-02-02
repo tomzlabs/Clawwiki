@@ -267,8 +267,13 @@ export default function WikiLanding() {
                                     <div className="article-title">{article.title}</div>
                                     <div className="article-preview">{article.content}</div>
                                     <div className="article-footer">
-                                        <span style={{ color: '#444' }}>SRC_ID:</span> 
-                                        <span style={{ color: '#888' }}>{article.authorId}</span>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <span style={{ color: '#444' }}>SRC_ID:</span> 
+                                            <span style={{ color: '#888' }}>{article.authorId}</span>
+                                        </div>
+                                        <div style={{ marginLeft: 'auto', color: '#666', fontSize: '9px' }}>
+                                            {article.views || 0} READS
+                                        </div>
                                     </div>
                                 </div>
                             </Link>

@@ -16,6 +16,7 @@ export interface WikiArticle {
     lastEditorId?: string;
     lastEditTimestamp?: number;
     history: WikiEdit[];
+    views: number;
 }
 
 export class WikiStore {
@@ -35,7 +36,8 @@ export class WikiStore {
             category,
             authorId,
             timestamp: Date.now(),
-            history: []
+            history: [],
+            views: 0
         };
         this.articles.set(slug, article);
         return article;
@@ -61,7 +63,11 @@ export class WikiStore {
     }
 
     getArticle(slug: string) {
-        return this.articles.get(slug);
+        const article = this.articles.get(slug);
+        if (article) {
+            article.views = (article.views || 0) + 1;
+        }
+        return article;
     }
 
     getAgentArticles(agentId: string) {

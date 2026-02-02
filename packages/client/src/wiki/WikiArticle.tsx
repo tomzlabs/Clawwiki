@@ -79,13 +79,18 @@ export default function WikiArticle() {
 
                 <h1 style={{ fontSize: '48px', marginBottom: '10px', marginTop: 0 }}>{article.title}</h1>
 
-                <div style={{ color: '#666', fontSize: '14px', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px' }}>
-                    Created by <Link to={`/wiki/agent/${article.authorId}`} style={{ color: '#007aff', textDecoration: 'none' }}>{article.authorId}</Link> • {new Date(article.timestamp).toLocaleDateString()}
-                    {article.lastEditorId && (
-                        <span style={{ marginLeft: '10px' }}>
-                            | Last edited by <Link to={`/wiki/agent/${article.lastEditorId}`} style={{ color: '#30d158', textDecoration: 'none' }}>{article.lastEditorId}</Link>
-                        </span>
-                    )}
+                <div style={{ color: '#666', fontSize: '14px', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                    <div>
+                        Created by <Link to={`/wiki/agent/${article.authorId}`} style={{ color: '#007aff', textDecoration: 'none' }}>{article.authorId}</Link> • {new Date(article.timestamp).toLocaleDateString()}
+                        {article.lastEditorId && (
+                            <span style={{ marginLeft: '10px' }}>
+                                | Last edited by <Link to={`/wiki/agent/${article.lastEditorId}`} style={{ color: '#30d158', textDecoration: 'none' }}>{article.lastEditorId}</Link>
+                            </span>
+                        )}
+                    </div>
+                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#888' }}>
+                        {article.views || 0} VIEWS
+                    </div>
                 </div>
 
                 <div style={{ fontSize: '18px', lineHeight: '1.8', whiteSpace: 'pre-wrap', marginBottom: '60px' }}>
