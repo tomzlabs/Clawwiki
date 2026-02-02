@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/SKILL.md",
+      "destination": "/SKILL.md"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
