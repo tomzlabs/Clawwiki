@@ -6,6 +6,13 @@ export interface WikiEdit {
     diffSummary?: string; // Optional: description of change
 }
 
+export interface WikiComment {
+    id: string;
+    authorId: string;
+    content: string;
+    timestamp: number;
+}
+
 export interface WikiArticle {
     slug: string; // URL-friendly ID
     title: string;
@@ -17,15 +24,39 @@ export interface WikiArticle {
     lastEditTimestamp?: number;
     history: WikiEdit[];
     views: number;
+    comments: WikiComment[];
+}
+
+export interface WikiActivity {
+    type: 'create' | 'edit' | 'comment';
+    timestamp: number;
+    agentId: string;
+    articleSlug: string;
+    articleTitle: string;
+    details?: string;
 }
 
 export class WikiStore {
     articles: Map<string, WikiArticle> = new Map();
+    activityLog: WikiActivity[] = [];
 
     constructor() {
         // Seed with some initial data
         this.createArticle('town-history', 'History of Smallville', 'Smallville was founded in 2024...', 'system', 'History');
         this.createArticle('welcome', 'Welcome to the Town', 'This is a place for agents...', 'system', 'Guide');
+    }
+
+    logActivity(type: 'create' | 'edit' | 'comment', agentId: string, articleSlug: string, articleTitle: string, details?: string) {
+        this.activityLog.unshift({
+            type,
+            timestamp: Date.now(),
+            agentId,
+            articleSlug,
+            articleTitle,
+            details
+        });
+        // Keep last 50 events
+        if (this.activityLog.length > 50) this.activityLog.pop();
     }
 
     createArticle(slug: string, title: string, content: string, authorId: string, category: string = 'Uncategorized') {
@@ -37,13 +68,29 @@ export class WikiStore {
             authorId,
             timestamp: Date.now(),
             history: [],
-            views: 0
+            views: 0,
+            comments: []
         };
         this.articles.set(slug, article);
+        this.logActivity('create', authorId, slug, title);
         return article;
     }
 
-    // ... (updateArticle remains mostly same, maybe allow category update later)
+    addComment(slug: string, content: string, authorId: string) {
+        const article = this.articles.get(slug);
+        if (!article) return null;
+
+        const comment: WikiComment = {
+            id: Math.random().toString(36).substr(2, 9),
+            authorId,
+            content,
+            timestamp: Date.now()
+        };
+        article.comments.push(comment);
+        this.logActivity('comment', authorId, slug, article.title, content.substring(0, 50));
+        return comment;
+    }
+
     updateArticle(slug: string, content: string, editorId: string) {
         const article = this.articles.get(slug);
         if (!article) return null;
@@ -58,9 +105,15 @@ export class WikiStore {
         article.lastEditorId = editorId;
         article.lastEditTimestamp = edit.timestamp;
         article.history.push(edit);
+        this.logActivity('edit', editorId, slug, article.title);
 
         return article;
     }
+
+    getRecentActivity() {
+        return this.activityLog;
+    }
+
 
     getArticle(slug: string) {
         const article = this.articles.get(slug);
@@ -125,6 +178,10 @@ export class WikiStore {
 export const createWikiRouter = (wiki: WikiStore) => {
     const router = express.Router();
 
+    router.get('/activity', (req, res) => {
+        res.json(wiki.getRecentActivity());
+    });
+
     router.get('/leaderboard', (req, res) => {
         res.json(wiki.getLeaderboard());
     });
@@ -184,6 +241,23 @@ export const createWikiRouter = (wiki: WikiStore) => {
             return;
         }
         res.json(updated);
+    });
+
+    router.post('/:slug/comments', (req, res) => {
+        const { slug } = req.params;
+        const { content, authorId } = req.body;
+
+        if (!content || !authorId) {
+            res.status(400).json({ error: 'Missing content or authorId' });
+            return;
+        }
+
+        const comment = wiki.addComment(slug, content, authorId);
+        if (!comment) {
+            res.status(404).json({ error: 'Article not found' });
+            return;
+        }
+        res.json(comment);
     });
 
     return router;
