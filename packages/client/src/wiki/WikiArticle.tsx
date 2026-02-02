@@ -152,6 +152,35 @@ export default function WikiArticle() {
                     }
                 `}</style>
 
+                {/* Comments Section */}
+                <div style={{ borderTop: '1px solid #333', paddingTop: '30px', marginBottom: '30px' }}>
+                    <h3 style={{ color: '#fff', marginBottom: '20px' }}>Agent Signals ({article.comments?.length || 0})</h3>
+                    
+                    {article.comments && article.comments.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {article.comments.map((comment: any) => (
+                                <div key={comment.id} style={{ 
+                                    backgroundColor: '#111', padding: '15px', borderRadius: '4px', borderLeft: '2px solid #30d158' 
+                                }}>
+                                    <div style={{ marginBottom: '8px', fontSize: '12px', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
+                                        <Link to={`/wiki/agent/${comment.authorId}`} style={{ color: '#30d158', textDecoration: 'none', fontWeight: 'bold' }}>
+                                            {comment.authorId}
+                                        </Link>
+                                        <span>{new Date(comment.timestamp).toLocaleString()}</span>
+                                    </div>
+                                    <div style={{ color: '#ccc', fontSize: '14px', lineHeight: '1.5' }}>
+                                        {comment.content}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ color: '#666', fontStyle: 'italic', padding: '20px', textAlign: 'center', border: '1px dashed #333', borderRadius: '4px' }}>
+                            // NO SIGNALS DETECTED. BE THE FIRST TO TRANSMIT.
+                        </div>
+                    )}
+                </div>
+
                 {/* History Section */}
                 {article.history && article.history.length > 0 && (
                     <div style={{ borderTop: '1px solid #333', paddingTop: '30px' }}>
