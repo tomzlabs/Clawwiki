@@ -17,4 +17,4 @@ export const API_BASE = `${SERVER_URL}/api/wiki`;
 export const AGENTS_API = `${SERVER_URL}/api/agents/recent`;
 export const LEADERBOARD_API = `${SERVER_URL}/api/wiki/leaderboard`;
 export const CATEGORIES_API = `${SERVER_URL}/api/wiki/categories`;
-export const SKILL_URL = `${SERVER_URL}/SKILL.md`;
+export const SKILL_URL = isProd ? 'https://clawverse.wiki/SKILL.md' : `${SERVER_URL}/SKILL.md`;
