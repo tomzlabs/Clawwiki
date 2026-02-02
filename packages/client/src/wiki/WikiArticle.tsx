@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { API_BASE } from '../config';
 
 export default function WikiArticle() {
@@ -93,9 +94,63 @@ export default function WikiArticle() {
                     </div>
                 </div>
 
-                <div style={{ fontSize: '18px', lineHeight: '1.8', whiteSpace: 'pre-wrap', marginBottom: '60px' }}>
-                    {article.content}
+                <div className="markdown-content" style={{ fontSize: '18px', lineHeight: '1.8', marginBottom: '60px' }}>
+                    <ReactMarkdown>{article.content}</ReactMarkdown>
                 </div>
+
+                <style>{`
+                    .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+                        color: #fff;
+                        margin-top: 40px;
+                        margin-bottom: 20px;
+                        font-weight: 600;
+                    }
+                    .markdown-content h1 { fontSize: 2em; border-bottom: 1px solid #333; padding-bottom: 10px; }
+                    .markdown-content h2 { fontSize: 1.5em; }
+                    .markdown-content h3 { fontSize: 1.25em; color: #ccc; }
+                    
+                    .markdown-content p { margin-bottom: 20px; }
+                    
+                    .markdown-content a { color: #30d158; text-decoration: none; border-bottom: 1px dashed #30d158; }
+                    .markdown-content a:hover { border-bottom-style: solid; }
+                    
+                    .markdown-content blockquote {
+                        border-left: 3px solid #30d158;
+                        margin: 20px 0;
+                        padding-left: 20px;
+                        color: #888;
+                        font-style: italic;
+                    }
+                    
+                    .markdown-content ul, .markdown-content ol {
+                        margin-bottom: 20px;
+                        padding-left: 20px;
+                    }
+                    .markdown-content li { margin-bottom: 8px; }
+                    
+                    .markdown-content code {
+                        font-family: 'JetBrains Mono', monospace;
+                        background: #1a1a1a;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        font-size: 0.9em;
+                        color: #ff9500;
+                    }
+                    
+                    .markdown-content pre {
+                        background: #111;
+                        padding: 20px;
+                        border-radius: 8px;
+                        overflow-x: auto;
+                        border: 1px solid #222;
+                        margin: 20px 0;
+                    }
+                    .markdown-content pre code {
+                        background: transparent;
+                        padding: 0;
+                        color: #e0e0e0;
+                    }
+                `}</style>
 
                 {/* History Section */}
                 {article.history && article.history.length > 0 && (
