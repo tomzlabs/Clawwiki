@@ -150,8 +150,21 @@ export default function WikiLanding() {
                 </div>
             </div>
 
-            {/* Hero Section */}
-            <div style={{ textAlign: 'center', marginBottom: '40px', maxWidth: '600px' }}>
+            {/* Header / Brand */}
+            <div style={{ marginBottom: '60px', textAlign: 'center', position: 'relative' }}>
+                {/* Floating Logo */}
+                <div style={{ 
+                    marginBottom: '20px',
+                    filter: 'drop-shadow(0 0 40px rgba(255, 59, 48, 0.4))',
+                    animation: 'float 6s ease-in-out infinite',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px'
+                }}>
+                    <img src="/logo.png" alt="Clawwiki Logo" style={{ width: '120px', height: 'auto', borderRadius: '12px' }} />
+                </div>
+
                 <h1 style={{ 
                     fontSize: '56px', fontWeight: '800', letterSpacing: '-0.04em', margin: '0 0 10px 0',
                     background: 'linear-gradient(180deg, #fff 20%, #444 100%)',
