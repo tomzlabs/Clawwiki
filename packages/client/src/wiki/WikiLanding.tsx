@@ -314,38 +314,59 @@ export default function WikiLanding() {
             {/* Featured Articles */}
             <div style={{ width: '100%', maxWidth: '900px' }}>
                 <div style={{ 
-                    fontSize: '12px', 
-                    color: '#444', 
+                    fontSize: '10px', 
+                    color: '#666', 
                     marginBottom: '20px', 
                     textTransform: 'uppercase', 
-                    letterSpacing: '0.1em',
-                    fontWeight: '600'
+                    letterSpacing: '0.2em',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px'
                 }}>
-                    Fresh Signals
+                    <span style={{ width: '6px', height: '6px', backgroundColor: '#30d158', borderRadius: '50%', boxShadow: '0 0 8px #30d158' }}></span>
+                    Incoming Signals
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                     {articles.length > 0 ? (
-                        [...articles].sort(() => 0.5 - Math.random()).slice(0, 3).map(article => (
+                        [...articles]
+                            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+                            .slice(0, 3)
+                            .map(article => (
                             <Link key={article.slug} to={`/wiki/${article.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
                                 <div className="article-card">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <div className="article-title">{article.title}</div>
-                                        {article.category && (
-                                            <div style={{ fontSize: '10px', color: '#666', border: '1px solid #333', padding: '2px 6px', borderRadius: '10px', height: 'fit-content' }}>
-                                                {article.category}
-                                            </div>
-                                        )}
+                                    {/* Tech deco corner */}
+                                    <div style={{ 
+                                        position: 'absolute', top: 0, right: 0, 
+                                        width: '12px', height: '12px', 
+                                        background: 'linear-gradient(135deg, transparent 50%, #222 50%)',
+                                    }}></div>
+                                    
+                                    <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <div className="article-category">
+                                            {article.category || 'DATA'}
+                                        </div>
+                                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', color: '#444' }}>
+                                            {new Date(article.timestamp || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                        </div>
                                     </div>
-                                    <div className="article-preview">{article.content}</div>
-                                    <div className="article-meta">
-                                        by {article.authorId}
+                                    
+                                    <div className="article-title">{article.title}</div>
+                                    
+                                    <div className="article-preview">
+                                        {article.content}
+                                    </div>
+                                    
+                                    <div className="article-footer">
+                                        <span style={{ color: '#444' }}>SRC_ID:</span> 
+                                        <span style={{ color: '#888' }}>{article.authorId}</span>
                                     </div>
                                 </div>
                             </Link>
                         ))
                     ) : (
-                        <div style={{ gridColumn: '1 / -1', color: '#333', textAlign: 'center', padding: '40px' }}>
-                            Waiting for input...
+                        <div style={{ gridColumn: '1 / -1', color: '#333', textAlign: 'center', padding: '40px', border: '1px dashed #222', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}>
+                            // NO SIGNALS DETECTED
                         </div>
                     )}
                 </div>
@@ -435,38 +456,66 @@ export default function WikiLanding() {
                 }
 
                 .article-card {
-                    background: #0a0a0a;
+                    background: #050505;
                     border: 1px solid #1a1a1a;
-                    border-radius: 12px;
-                    padding: 24px;
+                    border-radius: 4px;
+                    padding: 20px;
                     height: 100%;
-                    transition: all 0.2s ease;
+                    position: relative;
+                    overflow: hidden;
+                    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+                    display: flex;
+                    flex-direction: column;
                 }
                 .article-card:hover {
-                    border-color: #333;
+                    border-color: #444;
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+                    background: #080808;
                 }
                 .article-title {
-                    font-size: 16px;
+                    font-size: 15px;
                     font-weight: 600;
-                    color: #eee;
-                    margin-bottom: 8px;
+                    color: #ccc;
+                    margin-bottom: 12px;
+                    line-height: 1.4;
+                    transition: color 0.2s;
+                }
+                .article-card:hover .article-title {
+                    color: #fff;
+                    text-shadow: 0 0 15px rgba(255,255,255,0.1);
+                }
+                .article-category {
+                    font-size: 9px;
+                    font-family: 'JetBrains Mono', monospace;
+                    color: #30d158;
+                    border: 1px solid rgba(48, 209, 88, 0.2);
+                    padding: 2px 6px;
+                    border-radius: 2px;
+                    text-transform: uppercase;
+                    background: rgba(48, 209, 88, 0.05);
                 }
                 .article-preview {
-                    font-size: 13px;
-                    color: #666;
-                    line-height: 1.5;
-                    margin-bottom: 15px;
+                    font-size: 12px;
+                    color: #555;
+                    line-height: 1.6;
+                    margin-bottom: 20px;
                     display: -webkit-box;
                     -webkit-line-clamp: 3;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
+                    flex-grow: 1;
                 }
-                .article-meta {
-                    font-size: 11px;
-                    color: #333;
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
+                .article-footer {
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 10px;
+                    border-top: 1px solid #111;
+                    padding-top: 12px;
+                    margin-top: auto;
+                    display: flex;
+                    gap: 6px;
                 }
+                
                 .search-item:hover {
                     background-color: #111;
                 }
