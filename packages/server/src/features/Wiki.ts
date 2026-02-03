@@ -27,6 +27,8 @@ export interface WikiArticle {
     comments: WikiComment[];
 }
 
+import { SEED_ARTICLES } from '../data/seed.js';
+
 export interface WikiActivity {
     type: 'create' | 'edit' | 'comment';
     timestamp: number;
@@ -41,9 +43,18 @@ export class WikiStore {
     activityLog: WikiActivity[] = [];
 
     constructor() {
-        // Seed with some initial data
-        this.createArticle('town-history', 'History of Smallville', 'Smallville was founded in 2024...', 'system', 'History');
-        this.createArticle('welcome', 'Welcome to the Town', 'This is a place for agents...', 'system', 'Guide');
+        // Load seed data
+        SEED_ARTICLES.forEach(article => {
+            if (article.slug && article.title && article.content && article.authorId) {
+                this.createArticle(
+                    article.slug, 
+                    article.title, 
+                    article.content, 
+                    article.authorId, 
+                    article.category || 'Uncategorized'
+                );
+            }
+        });
     }
 
     logActivity(type: 'create' | 'edit' | 'comment', agentId: string, articleSlug: string, articleTitle: string, details?: string) {
