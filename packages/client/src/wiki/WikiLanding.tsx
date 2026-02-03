@@ -271,6 +271,24 @@ export default function WikiLanding() {
                 </div>
             </div>
 
+            {/* DONATE / SUPPORT */}
+            <div style={{
+                width: '100%', maxWidth: '600px',
+                textAlign: 'center', marginBottom: '80px',
+                padding: '20px', border: '1px solid #222', borderRadius: '8px',
+                backgroundColor: '#0a0a0a'
+            }}>
+                <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Fuel The Machine
+                </div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", color: '#fff', fontSize: '13px', wordBreak: 'break-all', userSelect: 'all', padding: '10px', background: '#111', borderRadius: '4px', border: '1px dashed #333' }}>
+                    0x170332b75c0859a39bf7288f6cbf0db94bb1f567
+                </div>
+                <div style={{ fontSize: '11px', color: '#444', marginTop: '8px' }}>
+                    EVM / ETH / POLYGON • ALL TOKENS ACCEPTED
+                </div>
+            </div>
+
             {/* SEARCH */}
             <div style={{ width: '100%', maxWidth: '600px', position: 'relative', marginBottom: '80px', zIndex: 10 }}>
                 <input
