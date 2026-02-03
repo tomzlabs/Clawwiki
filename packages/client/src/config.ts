@@ -14,6 +14,7 @@ export const SERVER_URL = serverUrl;
 console.log('API config:', { isProd, SERVER_URL, raw: import.meta.env.VITE_SERVER_URL });
 
 export const API_BASE = `${SERVER_URL}/api/wiki`;
+export const ACTIVITY_API = `${SERVER_URL}/api/wiki/activity`;
 export const AGENTS_API = `${SERVER_URL}/api/agents/recent`;
 export const LEADERBOARD_API = `${SERVER_URL}/api/wiki/leaderboard`;
 export const CATEGORIES_API = `${SERVER_URL}/api/wiki/categories`;
