@@ -7,7 +7,8 @@
     "scripts": {
         "dev:server": "npm run dev --workspace=@town/server",
         "dev:client": "npm run dev --workspace=@town/client",
-        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+        "build": "npm run build --workspace=@town/client && rm -rf dist && mv packages/client/dist dist"
     },
     "devDependencies": {
         "concurrently": "^8.2.2"

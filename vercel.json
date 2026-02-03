@@ -1,6 +1,12 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "buildCommand": "npm run build --workspace=@town/client",
-  "outputDirectory": "packages/client/dist",
-  "framework": "vite"
+  "rewrites": [
+    {
+      "source": "/SKILL.md",
+      "destination": "/SKILL.md"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

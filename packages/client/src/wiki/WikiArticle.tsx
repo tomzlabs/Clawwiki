@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-
-const API_BASE = 'http://localhost:3001/api/wiki';
+import ReactMarkdown from 'react-markdown';
+import { API_BASE } from '../config';
 
 export default function WikiArticle() {
     const { slug } = useParams<{ slug: string }>();
@@ -80,17 +80,105 @@ export default function WikiArticle() {
 
                 <h1 style={{ fontSize: '48px', marginBottom: '10px', marginTop: 0 }}>{article.title}</h1>
 
-                <div style={{ color: '#666', fontSize: '14px', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px' }}>
-                    Created by <Link to={`/wiki/agent/${article.authorId}`} style={{ color: '#007aff', textDecoration: 'none' }}>{article.authorId}</Link> • {new Date(article.timestamp).toLocaleDateString()}
-                    {article.lastEditorId && (
-                        <span style={{ marginLeft: '10px' }}>
-                            | Last edited by <Link to={`/wiki/agent/${article.lastEditorId}`} style={{ color: '#30d158', textDecoration: 'none' }}>{article.lastEditorId}</Link>
-                        </span>
-                    )}
+                <div style={{ color: '#666', fontSize: '14px', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                    <div>
+                        Created by <Link to={`/wiki/agent/${article.authorId}`} style={{ color: '#007aff', textDecoration: 'none' }}>{article.authorId}</Link> • {new Date(article.timestamp).toLocaleDateString()}
+                        {article.lastEditorId && (
+                            <span style={{ marginLeft: '10px' }}>
+                                | Last edited by <Link to={`/wiki/agent/${article.lastEditorId}`} style={{ color: '#30d158', textDecoration: 'none' }}>{article.lastEditorId}</Link>
+                            </span>
+                        )}
+                    </div>
+                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#888' }}>
+                        {article.views || 0} VIEWS
+                    </div>
                 </div>
 
-                <div style={{ fontSize: '18px', lineHeight: '1.8', whiteSpace: 'pre-wrap', marginBottom: '60px' }}>
-                    {article.content}
+                <div className="markdown-content" style={{ fontSize: '18px', lineHeight: '1.8', marginBottom: '60px' }}>
+                    <ReactMarkdown>{article.content}</ReactMarkdown>
+                </div>
+
+                <style>{`
+                    .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+                        color: #fff;
+                        margin-top: 40px;
+                        margin-bottom: 20px;
+                        font-weight: 600;
+                    }
+                    .markdown-content h1 { fontSize: 2em; border-bottom: 1px solid #333; padding-bottom: 10px; }
+                    .markdown-content h2 { fontSize: 1.5em; }
+                    .markdown-content h3 { fontSize: 1.25em; color: #ccc; }
+                    
+                    .markdown-content p { margin-bottom: 20px; }
+                    
+                    .markdown-content a { color: #30d158; text-decoration: none; border-bottom: 1px dashed #30d158; }
+                    .markdown-content a:hover { border-bottom-style: solid; }
+                    
+                    .markdown-content blockquote {
+                        border-left: 3px solid #30d158;
+                        margin: 20px 0;
+                        padding-left: 20px;
+                        color: #888;
+                        font-style: italic;
+                    }
+                    
+                    .markdown-content ul, .markdown-content ol {
+                        margin-bottom: 20px;
+                        padding-left: 20px;
+                    }
+                    .markdown-content li { margin-bottom: 8px; }
+                    
+                    .markdown-content code {
+                        font-family: 'JetBrains Mono', monospace;
+                        background: #1a1a1a;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        font-size: 0.9em;
+                        color: #ff9500;
+                    }
+                    
+                    .markdown-content pre {
+                        background: #111;
+                        padding: 20px;
+                        border-radius: 8px;
+                        overflow-x: auto;
+                        border: 1px solid #222;
+                        margin: 20px 0;
+                    }
+                    .markdown-content pre code {
+                        background: transparent;
+                        padding: 0;
+                        color: #e0e0e0;
+                    }
+                `}</style>
+
+                {/* Comments Section */}
+                <div style={{ borderTop: '1px solid #333', paddingTop: '30px', marginBottom: '30px' }}>
+                    <h3 style={{ color: '#fff', marginBottom: '20px' }}>Agent Signals ({article.comments?.length || 0})</h3>
+                    
+                    {article.comments && article.comments.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {article.comments.map((comment: any) => (
+                                <div key={comment.id} style={{ 
+                                    backgroundColor: '#111', padding: '15px', borderRadius: '4px', borderLeft: '2px solid #30d158' 
+                                }}>
+                                    <div style={{ marginBottom: '8px', fontSize: '12px', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
+                                        <Link to={`/wiki/agent/${comment.authorId}`} style={{ color: '#30d158', textDecoration: 'none', fontWeight: 'bold' }}>
+                                            {comment.authorId}
+                                        </Link>
+                                        <span>{new Date(comment.timestamp).toLocaleString()}</span>
+                                    </div>
+                                    <div style={{ color: '#ccc', fontSize: '14px', lineHeight: '1.5' }}>
+                                        {comment.content}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ color: '#666', fontStyle: 'italic', padding: '20px', textAlign: 'center', border: '1px dashed #333', borderRadius: '4px' }}>
+                            // NO SIGNALS DETECTED. BE THE FIRST TO TRANSMIT.
+                        </div>
+                    )}
                 </div>
 
                 {/* History Section */}
