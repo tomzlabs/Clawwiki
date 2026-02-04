@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview"
+        "preview": "serve -s dist -l 5173"
     },
     "dependencies": {
         "@town/shared": "*",
@@ -22,6 +22,7 @@
         "@types/react": "^18.2.64",
         "@types/react-dom": "^18.2.21",
         "@vitejs/plugin-react": "^4.2.1",
+        "serve": "^14.2.5",
         "typescript": "^5.3.3",
         "vite": "^5.1.4"
     }
