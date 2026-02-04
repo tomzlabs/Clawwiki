@@ -78,7 +78,7 @@ export default function WikiArticle() {
                     ← Back to Search
                 </Link>
 
-                <h1 style={{ fontSize: '48px', marginBottom: '10px', marginTop: 0 }}>{article.title}</h1>
+                <h1 style={{ fontSize: '32px', marginBottom: '10px', marginTop: 0, lineHeight: '1.3' }}>{article.title}</h1>
 
                 <div style={{ color: '#666', fontSize: '14px', marginBottom: '40px', borderBottom: '1px solid #333', paddingBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
                     <div>
@@ -94,62 +94,71 @@ export default function WikiArticle() {
                     </div>
                 </div>
 
-                <div className="markdown-content" style={{ fontSize: '18px', lineHeight: '1.8', marginBottom: '60px' }}>
+                <div className="markdown-content" style={{ fontSize: '15px', lineHeight: '1.75', marginBottom: '60px' }}>
                     <ReactMarkdown>{article.content}</ReactMarkdown>
                 </div>
 
                 <style>{`
                     .markdown-content h1, .markdown-content h2, .markdown-content h3 {
                         color: #fff;
-                        margin-top: 40px;
-                        margin-bottom: 20px;
                         font-weight: 600;
                     }
-                    .markdown-content h1 { fontSize: 2em; border-bottom: 1px solid #333; padding-bottom: 10px; }
-                    .markdown-content h2 { fontSize: 1.5em; }
-                    .markdown-content h3 { fontSize: 1.25em; color: #ccc; }
+                    .markdown-content h1 { font-size: 1.6em; margin-top: 36px; margin-bottom: 16px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+                    .markdown-content h2 { font-size: 1.3em; margin-top: 30px; margin-bottom: 12px; }
+                    .markdown-content h3 { font-size: 1.1em; margin-top: 24px; margin-bottom: 10px; color: #ccc; }
                     
-                    .markdown-content p { margin-bottom: 20px; }
+                    .markdown-content p { margin-bottom: 14px; color: #d0d0d0; }
                     
                     .markdown-content a { color: #30d158; text-decoration: none; border-bottom: 1px dashed #30d158; }
                     .markdown-content a:hover { border-bottom-style: solid; }
                     
                     .markdown-content blockquote {
                         border-left: 3px solid #30d158;
-                        margin: 20px 0;
-                        padding-left: 20px;
-                        color: #888;
+                        margin: 16px 0;
+                        padding: 10px 16px;
+                        color: #999;
                         font-style: italic;
+                        background: #111;
+                        border-radius: 0 4px 4px 0;
                     }
                     
                     .markdown-content ul, .markdown-content ol {
-                        margin-bottom: 20px;
+                        margin-bottom: 14px;
                         padding-left: 20px;
                     }
-                    .markdown-content li { margin-bottom: 8px; }
+                    .markdown-content li { margin-bottom: 6px; color: #d0d0d0; }
                     
                     .markdown-content code {
                         font-family: 'JetBrains Mono', monospace;
                         background: #1a1a1a;
                         padding: 2px 6px;
-                        border-radius: 4px;
-                        font-size: 0.9em;
+                        border-radius: 3px;
+                        font-size: 0.85em;
                         color: #ff9500;
                     }
                     
                     .markdown-content pre {
                         background: #111;
-                        padding: 20px;
-                        border-radius: 8px;
+                        padding: 16px;
+                        border-radius: 6px;
                         overflow-x: auto;
                         border: 1px solid #222;
-                        margin: 20px 0;
+                        margin: 16px 0;
+                        font-size: 13px;
                     }
                     .markdown-content pre code {
                         background: transparent;
                         padding: 0;
                         color: #e0e0e0;
+                        font-size: 13px;
                     }
+                    
+                    .markdown-content strong { color: #fff; }
+                    
+                    .markdown-content table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+                    .markdown-content th, .markdown-content td { border: 1px solid #333; padding: 8px 12px; text-align: left; font-size: 13px; }
+                    .markdown-content th { background: #1a1a1a; color: #fff; font-weight: 600; }
+                    .markdown-content td { color: #ccc; }
                 `}</style>
 
                 {/* Comments Section */}
