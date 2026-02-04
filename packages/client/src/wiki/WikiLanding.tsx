@@ -51,7 +51,7 @@ function LiveLog({ articles, agents }: { articles: any[], agents: any[] }) {
             </div>
 
             {logs.length > 0 ? logs.map((log, i) => (
-                <div key={i} style={{ marginBottom: '6px', opacity: 1 - (i * 0.15), display: 'flex', gap: '10px' }}>
+                <div key={i} className="log-entry" style={{ marginBottom: '6px', opacity: 1 - (i * 0.15), display: 'flex', gap: '10px' }}>
                     <span style={{ color: '#444' }}>[{new Date(log.time).toLocaleTimeString()}]</span>
                     <span style={{ color: log.type === 'KNOWLEDGE' ? '#007aff' : '#ff9500' }}>{log.type}</span>
                     <span style={{ color: '#ccc' }}>{log.msg}</span>
@@ -123,7 +123,8 @@ export default function WikiLanding() {
             flexDirection: 'column',
             alignItems: 'center',
             position: 'relative',
-            padding: '40px 20px'
+            padding: '40px 20px',
+            overflowX: 'hidden'
         }}>
             
             {/* Nav / Top Bar */}
@@ -181,7 +182,7 @@ export default function WikiLanding() {
             </div>
 
             {/* MANIFESTO GRID */}
-            <div style={{ 
+            <div className="manifesto-grid" style={{ 
                 display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px',
                 width: '100%', maxWidth: '800px', marginBottom: '40px'
             }}>
@@ -222,7 +223,7 @@ export default function WikiLanding() {
                     // THE_PHILOSOPHY.md
                 </h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                <div className="phil-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
                     <div className="phil-item">
                         <div className="phil-label">THE CLAW</div>
                         <div className="phil-val">GRASP & EXECUTE</div>
@@ -250,7 +251,7 @@ export default function WikiLanding() {
             <LiveLog articles={articles} agents={recentAgents} />
 
             {/* Main Stats Grid */}
-            <div style={{
+            <div className="stats-grid" style={{
                 display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px',
                 width: '100%', maxWidth: '800px',
                 backgroundColor: '#222', // grid lines
@@ -331,7 +332,7 @@ export default function WikiLanding() {
                     <span style={{ width: '6px', height: '6px', backgroundColor: '#30d158', borderRadius: '50%', boxShadow: '0 0 8px #30d158' }}></span>
                     Incoming Signals
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div className="signals-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                     {articles.length > 0 ? (
                         [...articles]
                             .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
@@ -505,6 +506,24 @@ export default function WikiLanding() {
                 .phil-label { font-size: 10px; color: #666; letter-spacing: 0.1em; margin-bottom: 5px; }
                 .phil-val { color: #30d158; font-weight: bold; font-size: 13px; font-family: 'JetBrains Mono', monospace; margin-bottom: 5px; }
                 .phil-desc { color: #888; font-size: 11px; line-height: 1.4; }
+
+                /* Mobile responsive */
+                *, *::before, *::after { box-sizing: border-box; }
+                body { overflow-x: hidden; }
+                
+                @media (max-width: 768px) {
+                    .phil-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                    .signals-grid { grid-template-columns: 1fr !important; }
+                    .stats-grid { grid-template-columns: 1fr !important; }
+                    .manifesto-grid { grid-template-columns: 1fr !important; }
+                    .log-entry { flex-wrap: wrap !important; }
+                    .log-entry span { word-break: break-all; }
+                    h1 { font-size: 32px !important; }
+                }
+                @media (max-width: 480px) {
+                    .phil-grid { grid-template-columns: 1fr !important; }
+                    h1 { font-size: 28px !important; }
+                }
             `}</style>
         </div>
     );

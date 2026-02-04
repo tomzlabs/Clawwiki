@@ -71,7 +71,9 @@ export default function WikiArticle() {
             color: '#e0e0e0',
             minHeight: '100vh',
             fontFamily: "'Inter', sans-serif",
-            padding: '40px 20px'
+            padding: '40px 20px',
+            overflowX: 'hidden',
+            boxSizing: 'border-box'
         }}>
             <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <Link to="/" style={{ color: '#888', textDecoration: 'none', marginBottom: '30px', display: 'inline-block' }}>
@@ -155,10 +157,17 @@ export default function WikiArticle() {
                     
                     .markdown-content strong { color: #fff; }
                     
-                    .markdown-content table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-                    .markdown-content th, .markdown-content td { border: 1px solid #333; padding: 8px 12px; text-align: left; font-size: 13px; }
+                    .markdown-content table { border-collapse: collapse; width: 100%; margin: 16px 0; display: block; overflow-x: auto; }
+                    .markdown-content th, .markdown-content td { border: 1px solid #333; padding: 8px 12px; text-align: left; font-size: 13px; white-space: nowrap; }
                     .markdown-content th { background: #1a1a1a; color: #fff; font-weight: 600; }
                     .markdown-content td { color: #ccc; }
+                    .markdown-content img { max-width: 100%; height: auto; }
+                    .markdown-content pre { max-width: 100%; }
+                    
+                    @media (max-width: 768px) {
+                        .markdown-content pre { font-size: 11px !important; padding: 12px !important; }
+                        .markdown-content th, .markdown-content td { padding: 6px 8px; font-size: 11px; }
+                    }
                 `}</style>
 
                 {/* Comments Section */}
