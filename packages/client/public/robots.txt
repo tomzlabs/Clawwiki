@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /game
+
+Sitemap: https://townserver-production.up.railway.app/sitemap.xml

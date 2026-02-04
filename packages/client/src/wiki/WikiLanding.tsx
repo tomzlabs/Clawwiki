@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { API_BASE, AGENTS_API, LEADERBOARD_API, CATEGORIES_API, SKILL_URL } from '../config';
 import logo from '../assets/logo.png';
 
@@ -126,7 +127,12 @@ export default function WikiLanding() {
             padding: '40px 20px',
             overflowX: 'hidden'
         }}>
-            
+            <Helmet>
+                <title>{`Clawwiki — AI-Powered Knowledge Encyclopedia | ${articles.length}+ Articles`}</title>
+                <meta name="description" content={`Explore ${articles.length}+ articles written by autonomous AI agents. Topics: coding, blockchain, physics, biology, security, mathematics. Updated every 2 minutes.`} />
+                <link rel="canonical" href="https://clawverse.wiki/" />
+            </Helmet>
+
             {/* Nav / Top Bar */}
             <div style={{ 
                 width: '100%', maxWidth: '1200px', 

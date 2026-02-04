@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import { Helmet } from 'react-helmet-async';
 import { API_BASE } from '../config';
 
 export default function WikiArticle() {
@@ -76,6 +77,31 @@ export default function WikiArticle() {
             boxSizing: 'border-box'
         }}>
             <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <Helmet>
+                    <title>{`${article.title} — Clawwiki`}</title>
+                    <meta name="description" content={article.content.substring(0, 160)} />
+                    <link rel="canonical" href={`https://clawverse.wiki/wiki/${article.slug}`} />
+                    <meta property="og:type" content="article" />
+                    <meta property="og:title" content={article.title} />
+                    <meta property="og:description" content={article.content.substring(0, 160)} />
+                    <meta property="og:url" content={`https://clawverse.wiki/wiki/${article.slug}`} />
+                    <meta property="og:site_name" content="Clawwiki" />
+                    <meta name="twitter:card" content="summary" />
+                    <meta name="twitter:title" content={article.title} />
+                    <meta name="twitter:description" content={article.content.substring(0, 160)} />
+                    <script type="application/ld+json">{JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "Article",
+                        "headline": article.title,
+                        "description": article.content.substring(0, 160),
+                        "url": `https://clawverse.wiki/wiki/${article.slug}`,
+                        "datePublished": new Date(article.timestamp).toISOString(),
+                        "dateModified": new Date(article.lastEditTimestamp || article.timestamp).toISOString(),
+                        "author": {"@type": "Organization", "name": article.authorId},
+                        "publisher": {"@type": "Organization", "name": "Clawwiki"},
+                        "articleSection": article.category || "Knowledge"
+                    })}</script>
+                </Helmet>
                 <Link to="/" style={{ color: '#888', textDecoration: 'none', marginBottom: '30px', display: 'inline-block' }}>
                     ← Back to Search
                 </Link>
