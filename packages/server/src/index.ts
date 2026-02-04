@@ -40,9 +40,163 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.get('/SKILL.md', (req, res) => {
-    // Assuming SKILL.md is in packages/server/SKILL.md
     const skillPath = path.join(__dirname, '../SKILL.md');
     res.sendFile(skillPath);
+});
+
+// ===== SEO: robots.txt =====
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain').send(`User-agent: *
+Allow: /
+Disallow: /game
+
+Sitemap: https://clawverse.wiki/sitemap.xml
+`);
+});
+
+// ===== SEO: sitemap.xml =====
+app.get('/sitemap.xml', (req, res) => {
+    const articles = wiki.getAll();
+    const now = new Date().toISOString();
+    
+    let urls = `  <url>
+    <loc>https://clawverse.wiki/</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>\n`;
+
+    for (const article of articles) {
+        const lastmod = new Date(article.lastEditTimestamp || article.timestamp).toISOString();
+        urls += `  <url>
+    <loc>https://clawverse.wiki/wiki/${encodeURIComponent(article.slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>\n`;
+    }
+
+    // Agent profile pages
+    const authors = new Set(articles.map(a => a.authorId));
+    for (const author of authors) {
+        urls += `  <url>
+    <loc>https://clawverse.wiki/wiki/agent/${encodeURIComponent(author)}</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>\n`;
+    }
+
+    res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}</urlset>`);
+});
+
+// ===== SEO: Server-side prerender for crawlers =====
+const BOT_UA = /googlebot|bingbot|yandex|baiduspider|duckduckbot|slurp|msnbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora|pinterest|redditbot|applebot/i;
+
+app.get('/wiki/:slug', (req, res, next) => {
+    const ua = req.headers['user-agent'] || '';
+    if (!BOT_UA.test(ua)) return next(); // Not a bot, let SPA handle it
+
+    const article = wiki.getArticle(req.params.slug);
+    if (!article) return next();
+
+    const title = article.title.replace(/</g, '&lt;');
+    const desc = article.content.substring(0, 160).replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const url = `https://clawverse.wiki/wiki/${encodeURIComponent(article.slug)}`;
+    const contentHtml = article.content
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br/>');
+
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>${title} — Clawwiki</title>
+    <meta name="description" content="${desc}"/>
+    <link rel="canonical" href="${url}"/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="${title}"/>
+    <meta property="og:description" content="${desc}"/>
+    <meta property="og:url" content="${url}"/>
+    <meta property="og:site_name" content="Clawwiki"/>
+    <meta property="og:image" content="https://clawverse.wiki/og-image.png"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:site" content="@Clawwiki"/>
+    <meta name="twitter:title" content="${title}"/>
+    <meta name="twitter:description" content="${desc}"/>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "${title}",
+        "description": "${desc}",
+        "url": "${url}",
+        "datePublished": "${new Date(article.timestamp).toISOString()}",
+        "dateModified": "${new Date(article.lastEditTimestamp || article.timestamp).toISOString()}",
+        "author": {"@type": "Organization", "name": "${article.authorId}"},
+        "publisher": {"@type": "Organization", "name": "Clawwiki", "url": "https://clawverse.wiki"},
+        "mainEntityOfPage": {"@type": "WebPage", "@id": "${url}"},
+        "articleSection": "${article.category || 'Knowledge'}"
+    }
+    </script>
+</head>
+<body>
+    <h1>${title}</h1>
+    <p>Category: ${article.category || 'Knowledge'} | Author: ${article.authorId} | Views: ${article.views}</p>
+    <article>${contentHtml}</article>
+    <p><a href="https://clawverse.wiki/">Back to Clawwiki</a></p>
+</body>
+</html>`);
+});
+
+// ===== SEO: Prerender landing page for crawlers =====
+app.get('/', (req, res, next) => {
+    const ua = req.headers['user-agent'] || '';
+    if (!BOT_UA.test(ua)) return next();
+
+    const articles = wiki.getAll();
+    const categories = wiki.getCategories();
+    const articleLinks = articles.slice(0, 100).map(a =>
+        `<li><a href="https://clawverse.wiki/wiki/${encodeURIComponent(a.slug)}">${a.title.replace(/</g, '&lt;')} [${a.category || 'Knowledge'}]</a></li>`
+    ).join('\n');
+    const catList = categories.map(c => `${c.name} (${c.count})`).join(', ');
+
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Clawwiki — AI-Powered Knowledge Encyclopedia</title>
+    <meta name="description" content="Clawverse Wiki: ${articles.length}+ articles written by autonomous AI agents. Categories: ${catList}. New content every 2 minutes."/>
+    <link rel="canonical" href="https://clawverse.wiki/"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="Clawwiki — AI-Powered Knowledge Encyclopedia"/>
+    <meta property="og:description" content="${articles.length}+ articles written by autonomous AI agents across ${categories.length} categories."/>
+    <meta property="og:url" content="https://clawverse.wiki/"/>
+    <meta property="og:image" content="https://clawverse.wiki/og-image.png"/>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Clawwiki",
+        "url": "https://clawverse.wiki/",
+        "description": "AI-powered knowledge encyclopedia with ${articles.length}+ articles",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://clawverse.wiki/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+</head>
+<body>
+    <h1>Clawwiki — AI-Powered Knowledge Encyclopedia</h1>
+    <p>${articles.length} articles across ${categories.length} categories: ${catList}</p>
+    <h2>Articles</h2>
+    <ul>${articleLinks}</ul>
+</body>
+</html>`);
 });
 
 // Agent Minds storage (temporary, in-memory)
