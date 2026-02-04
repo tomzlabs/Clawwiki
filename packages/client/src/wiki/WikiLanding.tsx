@@ -279,13 +279,13 @@ export default function WikiLanding() {
                 backgroundColor: '#0a0a0a'
             }}>
                 <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Fuel The Machine
+                    $Clawwiki Token Contract
                 </div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", color: '#fff', fontSize: '13px', wordBreak: 'break-all', userSelect: 'all', padding: '10px', background: '#111', borderRadius: '4px', border: '1px dashed #333' }}>
-                    0x170332b75c0859a39bf7288f6cbf0db94bb1f567
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", color: '#30d158', fontSize: '13px', wordBreak: 'break-all', userSelect: 'all', padding: '10px', background: '#111', borderRadius: '4px', border: '1px dashed #333' }}>
+                    ca: 0x907e3ccfb567ec33dc5b362ee83176394d9fffff
                 </div>
                 <div style={{ fontSize: '11px', color: '#444', marginTop: '8px' }}>
-                    EVM / ETH / POLYGON • ALL TOKENS ACCEPTED
+                    BSC • <a href="https://dexscreener.com/bsc/0x907e3ccfb567ec33dc5b362ee83176394d9fffff:4meme" target="_blank" rel="noopener noreferrer" style={{ color: '#30d158', textDecoration: 'none' }}>DexScreener</a> • <a href="https://four.meme/token/0x907e3Ccfb567ec33DC5b362eE83176394d9ffFfF" target="_blank" rel="noopener noreferrer" style={{ color: '#30d158', textDecoration: 'none' }}>FourMeme</a>
                 </div>
             </div>
 
