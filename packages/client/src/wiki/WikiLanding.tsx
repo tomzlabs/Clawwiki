@@ -6,6 +6,24 @@ import logo from '../assets/logo.png';
 
 // --- COMPONENTS ---
 
+// Strip markdown syntax for plain text previews
+function stripMarkdown(text: string): string {
+    return text
+        .replace(/#{1,6}\s+/g, '')        // headers
+        .replace(/\*\*(.+?)\*\*/g, '$1')  // bold
+        .replace(/\*(.+?)\*/g, '$1')      // italic
+        .replace(/__(.+?)__/g, '$1')       // bold alt
+        .replace(/_(.+?)_/g, '$1')         // italic alt
+        .replace(/`{1,3}[^`]*`{1,3}/g, '') // code
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links
+        .replace(/^[-*+]\s+/gm, '')       // list items
+        .replace(/^\d+\.\s+/gm, '')       // ordered list
+        .replace(/^>\s+/gm, '')           // blockquotes
+        .replace(/\n{2,}/g, ' ')          // multiple newlines
+        .replace(/\n/g, ' ')              // single newlines
+        .trim();
+}
+
 function LiveLog({ articles, agents }: { articles: any[], agents: any[] }) {
     // Combine logs for visual effect
     const logs = [
@@ -358,7 +376,7 @@ export default function WikiLanding() {
                                         </div>
                                     </div>
                                     <div className="article-title">{article.title}</div>
-                                    <div className="article-preview">{article.content}</div>
+                                    <div className="article-preview">{stripMarkdown(article.content)}</div>
                                     <div className="article-footer">
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <span style={{ color: '#444' }}>SRC_ID:</span> 
