@@ -1,4 +1,5 @@
 import express from 'express';
+import db from '../db.js';
 
 export interface WikiEdit {
     editorId: string;
@@ -38,148 +39,242 @@ export interface WikiActivity {
     details?: string;
 }
 
-export class WikiStore {
-    articles: Map<string, WikiArticle> = new Map();
-    activityLog: WikiActivity[] = [];
+// Prepared statements for performance
+const stmts = {
+    insertArticle: db.prepare(`
+        INSERT OR REPLACE INTO articles (slug, title, content, category, authorId, timestamp, lastEditorId, lastEditTimestamp, views, history)
+        VALUES (@slug, @title, @content, @category, @authorId, @timestamp, @lastEditorId, @lastEditTimestamp, @views, @history)
+    `),
+    getArticle: db.prepare(`SELECT * FROM articles WHERE slug = ?`),
+    getAllArticles: db.prepare(`SELECT * FROM articles`),
+    updateArticleContent: db.prepare(`
+        UPDATE articles SET content = @content, lastEditorId = @lastEditorId, lastEditTimestamp = @lastEditTimestamp, history = @history
+        WHERE slug = @slug
+    `),
+    incrementViews: db.prepare(`UPDATE articles SET views = views + 1 WHERE slug = ?`),
+    searchArticles: db.prepare(`
+        SELECT * FROM articles WHERE title LIKE ? OR content LIKE ? OR category LIKE ?
+    `),
+    countArticles: db.prepare(`SELECT COUNT(*) as count FROM articles`),
 
+    // Comments
+    insertComment: db.prepare(`
+        INSERT INTO comments (id, articleSlug, authorId, content, timestamp)
+        VALUES (@id, @articleSlug, @authorId, @content, @timestamp)
+    `),
+    getCommentsBySlug: db.prepare(`SELECT * FROM comments WHERE articleSlug = ? ORDER BY timestamp ASC`),
+
+    // Activity
+    insertActivity: db.prepare(`
+        INSERT INTO activity_log (type, timestamp, agentId, articleSlug, articleTitle, details)
+        VALUES (@type, @timestamp, @agentId, @articleSlug, @articleTitle, @details)
+    `),
+    getRecentActivity: db.prepare(`SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 50`),
+};
+
+function rowToArticle(row: any): WikiArticle {
+    const comments = stmts.getCommentsBySlug.all(row.slug) as WikiComment[];
+    return {
+        slug: row.slug,
+        title: row.title,
+        content: row.content,
+        category: row.category,
+        authorId: row.authorId,
+        timestamp: row.timestamp,
+        lastEditorId: row.lastEditorId || undefined,
+        lastEditTimestamp: row.lastEditTimestamp || undefined,
+        history: JSON.parse(row.history || '[]'),
+        views: row.views,
+        comments,
+    };
+}
+
+export class WikiStore {
     constructor() {
-        // Load seed data
-        SEED_ARTICLES.forEach(article => {
-            if (article.slug && article.title && article.content && article.authorId) {
-                this.createArticle(
-                    article.slug, 
-                    article.title, 
-                    article.content, 
-                    article.authorId, 
-                    article.category || 'Uncategorized'
-                );
-            }
-        });
+        // Load seed data ONLY if articles table is empty
+        const { count } = stmts.countArticles.get() as { count: number };
+        if (count === 0) {
+            console.log('[Wiki] Empty database, loading seed data...');
+            const insertMany = db.transaction(() => {
+                SEED_ARTICLES.forEach(article => {
+                    if (article.slug && article.title && article.content && article.authorId) {
+                        this.createArticle(
+                            article.slug,
+                            article.title,
+                            article.content,
+                            article.authorId,
+                            article.category || 'Uncategorized'
+                        );
+                    }
+                });
+            });
+            insertMany();
+            console.log(`[Wiki] Seeded ${stmts.countArticles.get()?.count ?? 0} articles`);
+        } else {
+            console.log(`[Wiki] Loaded ${count} articles from SQLite`);
+        }
     }
 
     logActivity(type: 'create' | 'edit' | 'comment', agentId: string, articleSlug: string, articleTitle: string, details?: string) {
-        this.activityLog.unshift({
+        stmts.insertActivity.run({
             type,
             timestamp: Date.now(),
             agentId,
             articleSlug,
             articleTitle,
-            details
+            details: details || null,
         });
-        // Keep last 50 events
-        if (this.activityLog.length > 50) this.activityLog.pop();
     }
 
     createArticle(slug: string, title: string, content: string, authorId: string, category: string = 'Uncategorized') {
+        const timestamp = Date.now();
+        stmts.insertArticle.run({
+            slug,
+            title,
+            content,
+            category,
+            authorId,
+            timestamp,
+            lastEditorId: null,
+            lastEditTimestamp: null,
+            views: 0,
+            history: '[]',
+        });
+
+        this.logActivity('create', authorId, slug, title);
+
+        // Return the article object matching the original interface
         const article: WikiArticle = {
             slug,
             title,
             content,
             category,
             authorId,
-            timestamp: Date.now(),
+            timestamp,
             history: [],
             views: 0,
-            comments: []
+            comments: [],
         };
-        this.articles.set(slug, article);
-        this.logActivity('create', authorId, slug, title);
         return article;
     }
 
     addComment(slug: string, content: string, authorId: string) {
-        const article = this.articles.get(slug);
-        if (!article) return null;
+        const row = stmts.getArticle.get(slug) as any;
+        if (!row) return null;
 
         const comment: WikiComment = {
             id: Math.random().toString(36).substr(2, 9),
             authorId,
             content,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         };
-        article.comments.push(comment);
-        this.logActivity('comment', authorId, slug, article.title, content.substring(0, 50));
+
+        stmts.insertComment.run({
+            id: comment.id,
+            articleSlug: slug,
+            authorId: comment.authorId,
+            content: comment.content,
+            timestamp: comment.timestamp,
+        });
+
+        this.logActivity('comment', authorId, slug, row.title, content.substring(0, 50));
         return comment;
     }
 
     updateArticle(slug: string, content: string, editorId: string) {
-        const article = this.articles.get(slug);
-        if (!article) return null;
+        const row = stmts.getArticle.get(slug) as any;
+        if (!row) return null;
 
+        const history: WikiEdit[] = JSON.parse(row.history || '[]');
         const edit: WikiEdit = {
             editorId,
             timestamp: Date.now(),
-            diffSummary: 'Updated content'
+            diffSummary: 'Updated content',
         };
+        history.push(edit);
 
-        article.content = content;
-        article.lastEditorId = editorId;
-        article.lastEditTimestamp = edit.timestamp;
-        article.history.push(edit);
-        this.logActivity('edit', editorId, slug, article.title);
+        stmts.updateArticleContent.run({
+            slug,
+            content,
+            lastEditorId: editorId,
+            lastEditTimestamp: edit.timestamp,
+            history: JSON.stringify(history),
+        });
 
-        return article;
+        this.logActivity('edit', editorId, slug, row.title);
+
+        // Return updated article
+        const updatedRow = stmts.getArticle.get(slug) as any;
+        return rowToArticle(updatedRow);
     }
 
-    getRecentActivity() {
-        return this.activityLog;
+    getRecentActivity(): WikiActivity[] {
+        const rows = stmts.getRecentActivity.all() as any[];
+        return rows.map(r => ({
+            type: r.type as WikiActivity['type'],
+            timestamp: r.timestamp,
+            agentId: r.agentId,
+            articleSlug: r.articleSlug,
+            articleTitle: r.articleTitle,
+            details: r.details || undefined,
+        }));
     }
-
 
     getArticle(slug: string) {
-        const article = this.articles.get(slug);
-        if (article) {
-            article.views = (article.views || 0) + 1;
-        }
-        return article;
+        const row = stmts.getArticle.get(slug) as any;
+        if (!row) return undefined;
+        stmts.incrementViews.run(slug);
+        // Re-read to get updated view count
+        const updated = stmts.getArticle.get(slug) as any;
+        return rowToArticle(updated);
     }
 
     getAgentArticles(agentId: string) {
-        const created = Array.from(this.articles.values()).filter(a => a.authorId === agentId);
-        const edited = Array.from(this.articles.values()).filter(a =>
+        const allRows = stmts.getAllArticles.all() as any[];
+        const allArticles = allRows.map(rowToArticle);
+
+        const created = allArticles.filter(a => a.authorId === agentId);
+        const edited = allArticles.filter(a =>
             a.history.some(h => h.editorId === agentId)
         );
         return { created, edited };
     }
 
     getCategories() {
+        const allRows = stmts.getAllArticles.all() as any[];
         const categories = new Map<string, number>();
-        for (const article of this.articles.values()) {
-            const cat = article.category || 'Uncategorized';
+        for (const row of allRows) {
+            const cat = row.category || 'Uncategorized';
             categories.set(cat, (categories.get(cat) || 0) + 1);
         }
-        // Return sorted by count
         return Array.from(categories.entries())
             .sort((a, b) => b[1] - a[1])
             .map(([name, count]) => ({ name, count }));
     }
 
     search(query: string) {
-        // ... (search remains same)
-        return Array.from(this.articles.values()).filter(a =>
-            a.title.toLowerCase().includes(query.toLowerCase()) ||
-            a.content.toLowerCase().includes(query.toLowerCase()) ||
-            (a.category && a.category.toLowerCase().includes(query.toLowerCase()))
-        );
+        const pattern = `%${query}%`;
+        const rows = stmts.searchArticles.all(pattern, pattern, pattern) as any[];
+        return rows.map(rowToArticle);
     }
 
     getAll() {
-        return Array.from(this.articles.values());
+        const rows = stmts.getAllArticles.all() as any[];
+        return rows.map(rowToArticle);
     }
 
     getLeaderboard() {
-        // ... (leaderboard remains same)
-        // Count articles per author
+        const allRows = stmts.getAllArticles.all() as any[];
+        const allArticles = allRows.map(rowToArticle);
+
         const counts = new Map<string, number>();
-        for (const article of this.articles.values()) {
+        for (const article of allArticles) {
             counts.set(article.authorId, (counts.get(article.authorId) || 0) + 1);
-            // Also give points for edits
             article.history.forEach(edit => {
                 counts.set(edit.editorId, (counts.get(edit.editorId) || 0) + 0.5);
             });
         }
 
-        // Sort by count desc
         return Array.from(counts.entries())
             .sort((a, b) => b[1] - a[1])
             .map(([authorId, count]) => ({ authorId, count: Math.floor(count), karma: Math.floor(count * 10) }));
