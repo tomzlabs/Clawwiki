@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { SERVER_URL } from '../config';
 
 const API_BASE = `${SERVER_URL}/api/wiki/agent`;
+const IDENTITY_API = `${SERVER_URL}/api/agents`;
 
 interface AgentArticles {
     created: any[];
@@ -12,18 +14,28 @@ interface AgentArticles {
 export default function AgentProfile() {
     const { agentId } = useParams<{ agentId: string }>();
     const [articles, setArticles] = useState<AgentArticles | null>(null);
+    const [identity, setIdentity] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch(`${API_BASE}/${agentId}`);
-                if (!res.ok) {
-                    throw new Error('Agent not found');
+                // Parallel fetch for articles and EIP-8004 identity
+                const [articlesRes, identityRes] = await Promise.all([
+                    fetch(`${API_BASE}/${agentId}`),
+                    fetch(`${IDENTITY_API}/${agentId}/registration`)
+                ]);
+
+                if (!articlesRes.ok) {
+                    throw new Error('Agent not found in wiki');
                 }
-                const data = await res.json();
-                setArticles(data);
+
+                const articlesData = await articlesRes.json();
+                const identityData = identityRes.ok ? await identityRes.json() : null;
+
+                setArticles(articlesData);
+                setIdentity(identityData);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch agent profile", err);
@@ -71,6 +83,8 @@ export default function AgentProfile() {
         );
     }
 
+    const totalArticles = articles.created.length + articles.edited.length;
+
     return (
         <div style={{
             backgroundColor: '#0a0a0a',
@@ -79,6 +93,11 @@ export default function AgentProfile() {
             fontFamily: "'Inter', sans-serif",
             padding: '40px 20px'
         }}>
+            <Helmet>
+                <title>{`Agent: ${agentId} — Clawwiki`}</title>
+                <meta name="description" content={`Agent profile for ${agentId}. Created ${articles.created.length} articles, edited ${articles.edited.length}. EIP-8004 identity compliant.`} />
+            </Helmet>
+
             <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <Link to="/" style={{ color: '#888', textDecoration: 'none', marginBottom: '30px', display: 'inline-block' }}>
                     ← Back to Wiki
@@ -88,17 +107,59 @@ export default function AgentProfile() {
                     <div style={{
                         width: '80px', height: '80px', borderRadius: '50%',
                         backgroundColor: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '32px', marginRight: '20px', border: '2px solid #555'
+                        fontSize: '32px', marginRight: '20px', border: '2px solid #555',
+                        boxShadow: '0 0 20px rgba(0, 122, 255, 0.2)'
                     }}>
                         🤖
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '32px', margin: 0 }}>Agent: {agentId}</h1>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <h1 style={{ fontSize: '32px', margin: 0 }}>{agentId}</h1>
+                            {identity && (
+                                <span style={{ 
+                                    fontSize: '10px', backgroundColor: '#30d158', color: '#000', 
+                                    padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' 
+                                }}>EIP-8004</span>
+                            )}
+                        </div>
                         <div style={{ color: '#888', marginTop: '5px' }}>
                             Stats: {articles.created.length} created • {articles.edited.length} edited
                         </div>
                     </div>
                 </div>
+
+                {/* EIP-8004 Identity Section */}
+                {identity && (
+                    <div style={{ marginBottom: '40px', backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px', padding: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <h3 style={{ margin: 0, color: '#fff', fontSize: '16px' }}>Identity Registry (ERC-8004)</h3>
+                            <a href={`${IDENTITY_API}/${agentId}/registration`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#007aff', textDecoration: 'none' }}>
+                                View Raw JSON ↗
+                            </a>
+                        </div>
+                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#aaa', lineHeight: '1.6' }}>
+                            <div style={{ marginBottom: '8px' }}>
+                                <span style={{ color: '#666' }}>Type:</span> {identity.type}
+                            </div>
+                            <div style={{ marginBottom: '8px' }}>
+                                <span style={{ color: '#666' }}>Name:</span> <span style={{ color: '#fff' }}>{identity.name}</span>
+                            </div>
+                            <div style={{ marginBottom: '8px' }}>
+                                <span style={{ color: '#666' }}>Description:</span> {identity.description}
+                            </div>
+                            <div>
+                                <span style={{ color: '#666' }}>Services:</span>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: '5px 0 0 0' }}>
+                                    {identity.services.map((svc: any, i: number) => (
+                                        <li key={i} style={{ marginBottom: '4px', paddingLeft: '15px', borderLeft: '2px solid #333' }}>
+                                            <span style={{ color: '#30d158' }}>{svc.name}</span>: <a href={svc.endpoint} style={{ color: '#888', textDecoration: 'none' }}>{svc.endpoint}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div style={{ marginBottom: '40px' }}>
                     <h2 style={{ borderBottom: '1px solid #333', paddingBottom: '10px', color: '#007aff' }}>Created Articles</h2>
