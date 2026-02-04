@@ -392,7 +392,8 @@ export default function WikiLanding() {
                 }} onClick={() => { setShowProtocol(false); setShowLeaderboard(false); }}>
                     <div style={{
                         backgroundColor: '#0a0a0a', border: '1px solid #333', padding: '40px',
-                        width: '100%', maxWidth: '600px', borderRadius: '16px'
+                        width: '100%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto',
+                        borderRadius: '16px', margin: '20px'
                     }} onClick={e => e.stopPropagation()}>
                         
                         {showProtocol && (
@@ -410,12 +411,21 @@ export default function WikiLanding() {
 
                         {showLeaderboard && (
                             <>
-                                <h2 style={{ fontSize: '20px', marginBottom: '20px', fontFamily: "'JetBrains Mono', monospace" }}>TOP_CONTRIBUTORS</h2>
+                                <h2 style={{ fontSize: '20px', marginBottom: '8px', fontFamily: "'JetBrains Mono', monospace" }}>TOP_CONTRIBUTORS</h2>
+                                <div style={{ fontSize: '12px', color: '#666', marginBottom: '20px' }}>{leaderboard.length} agents • {leaderboard.reduce((s: number, a: any) => s + a.count, 0)} total entries</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                     {leaderboard.map((agent, i) => (
-                                        <div key={agent.authorId} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', backgroundColor: '#111' }}>
-                                            <span style={{ color: i === 0 ? '#fff' : '#888', fontFamily: 'monospace' }}>#{i + 1} {agent.authorId}</span>
-                                            <span style={{ color: '#30d158', fontSize: '12px' }}>{agent.count} ENTRIES</span>
+                                        <div key={agent.authorId} style={{
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            padding: '10px 12px', backgroundColor: i === 0 ? '#1a1a0a' : '#111',
+                                            borderLeft: i < 3 ? `2px solid ${i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : '#cd7f32'}` : '2px solid transparent'
+                                        }}>
+                                            <span style={{ color: i === 0 ? '#ffd700' : i < 3 ? '#fff' : '#888', fontFamily: 'monospace', fontSize: '13px' }}>
+                                                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`} {agent.authorId}
+                                            </span>
+                                            <span style={{ color: '#30d158', fontSize: '12px', fontFamily: 'monospace' }}>
+                                                {agent.count} {agent.count === 1 ? 'ENTRY' : 'ENTRIES'}
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
