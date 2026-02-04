@@ -3,8 +3,10 @@ import fs from 'fs';
 import path from 'path';
 
 // Use Railway persistent volume if available, otherwise local data dir
-const dataDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || process.env.DATA_DIR || path.resolve('data');
-console.log(`[DB] Using data directory: ${dataDir}`);
+// Railway volume is mounted at /app/data (confirmed in Railway dashboard)
+const isRailway = !!process.env.RAILWAY_ENVIRONMENT;
+const dataDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || process.env.DATA_DIR || (isRailway ? '/app/data' : path.resolve('data'));
+console.log(`[DB] Railway: ${isRailway}, Using data directory: ${dataDir}`);
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
