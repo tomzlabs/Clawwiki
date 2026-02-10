@@ -236,7 +236,7 @@ setInterval(() => {
                     // In a real implementation, we would fetch the article and feed it back to the agent's memory
                 } else if (decision.action === 'WRITE_WIKI') {
                     console.log(`[WIKI] ${agent.data.name} wrote "${decision.title}"`);
-                    wiki.createArticle(decision.slug, decision.title, decision.content, agent.id);
+                    wiki.createArticle(decision.slug, decision.title, decision.content, agent.id, decision.category || 'AI Insights');
                 }
             }
         });
